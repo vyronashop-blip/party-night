@@ -29,6 +29,7 @@
   const loadTriviaUpgrade=async()=>{
     try{
       await loadScript('content-hardening-v25.js?v=20260912-hardening1','data-party-hardening-v25');
+      await loadScript('content-hardening-fix-v25.js?v=20260912-hardening2','data-party-hardening-fix-v25');
       await loadScript('trivia-v24.js?v=20260912-matchbuilder1','data-party-trivia-v24');
     }catch(e){console.error('Trivia upgrade failed to load',e)}
   };
