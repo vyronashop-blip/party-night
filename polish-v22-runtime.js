@@ -28,6 +28,7 @@
     if(document.querySelector(`script[${attr}]`)){resolve();return}
     const s=document.createElement('script');s.src=src;s.setAttribute(attr,'1');s.onload=resolve;s.onerror=reject;document.head.appendChild(s)
   });
+  const loadStyle=(href,id)=>{if(document.getElementById(id))return;const l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href=href;document.head.appendChild(l)};
   const loadUpgrades=async()=>{
     try{
       await loadScript('content-hardening-v25.js?v=20260912-hardening1','data-party-hardening-v25');
@@ -43,6 +44,8 @@
       await loadScript('pro-hotfix-v27.js?v=20260912-pro6','data-party-pro-hotfix-v27');
       await loadScript('gift-v28.js?v=20260912-gift2','data-party-gift-v28');
       await loadScript('final-polish-v28.js?v=20260912-gift2','data-party-final-polish-v28');
+      loadStyle('mega-v29.css?v=20260912-mega1','megaV29Style');
+      await loadScript('mega-content-v29.js?v=20260912-mega1','data-party-mega-v29');
       await loadScript('remote-v27.js?v=20260912-remote2','data-party-remote-v27');
     }catch(e){console.error('Party Night upgrade failed to load',e)}
   };
