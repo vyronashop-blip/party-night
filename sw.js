@@ -1,5 +1,5 @@
-const CACHE='party-night-v2-2-trivia-hardening-20260912';
-const ASSETS=['./','./index.html','./styles.css','./data.js','./content-v2.js','./content-v23.js','./content-hardening-v25.js','./app.js','./v21.js','./polish-v22-runtime.js','./polish-v22-runtime-core.js','./trivia-v24.js','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png','./favicon.png'];
+const CACHE='party-night-v2-2-trivia-hardening2-20260912';
+const ASSETS=['./','./index.html','./styles.css','./data.js','./content-v2.js','./content-v23.js','./content-hardening-v25.js','./content-hardening-fix-v25.js','./app.js','./v21.js','./polish-v22-runtime.js','./polish-v22-runtime-core.js','./trivia-v24.js','./manifest.webmanifest','./icon.svg','./apple-touch-icon.png','./favicon.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
