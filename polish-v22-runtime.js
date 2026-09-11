@@ -12,7 +12,7 @@
       const show=id=>document.getElementById(id)?.classList.remove('hidden');
       show('triviaSetup');hide('triviaPlay');hide('triviaFinishV24');
       document.querySelector('#triviaPlay .panel.center')?.classList.remove('hidden');
-      ['fakePass','fakeDebate','fakeVote','fakeReveal','syncTurn','syncResults','scaleLeader','scaleGuess','scaleReveal','tabooPlay','drawPass','drawTask','drawReveal','bowlPlay','bowlEnd','bombPlay','bombResult','playerPass','playerCard','fiveStage','majorityStage','orderStage','emojiStage','estimateStage','memoryStage','whisperStage','courtStage','pitchStage','forbiddenStage','missionStage','chainStage'].forEach(hide);
+      ['fakePass','fakeDebate','fakeVote','fakeReveal','syncTurn','syncResults','scaleLeader','scaleGuess','scaleReveal','tabooPlay','drawPass','drawTask','drawReveal','bowlPlay','bowlEnd','bombPlay','bombResult','playerPass','playerCard','fiveStage','majorityStage','orderStage','emojiStage','estimateStage','memoryStage','whisperStage','courtStage','pitchStage','forbiddenStage','missionStage','chainStage','whoStage','convStage'].forEach(hide);
       ['taScore','tbScore','tabAScore','tabBScore','bowlAScore','bowlBScore'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='0'});
       const round=document.getElementById('triviaRoundLabel');if(round)round.textContent='جولة';
       document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));
@@ -35,12 +35,13 @@
       await loadScript('trivia-v24.js?v=20260912-matchbuilder1','data-party-trivia-v24');
       await loadScript('content-v26.js?v=20260912-world1','data-party-content-v26');
       await loadScript('games-v26.js?v=20260912-world1','data-party-games-v26');
-      await loadScript('pro-content-v27.js?v=20260912-pro4','data-party-pro-content-v27');
-      await loadScript('trivia-pro-v27.js?v=20260912-pro4','data-party-pro-trivia-v27');
-      await loadScript('platform-pro-v27.js?v=20260912-pro4','data-party-pro-platform-v27');
-      await loadScript('games-pro-v27.js?v=20260912-pro4','data-party-pro-games-v27');
-      await loadScript('pro-fixes-v27.js?v=20260912-pro4','data-party-pro-fixes-v27');
-      await loadScript('pro-hotfix-v27.js?v=20260912-pro4','data-party-pro-hotfix-v27');
+      await loadScript('pro-content-v27.js?v=20260912-pro5','data-party-pro-content-v27');
+      await loadScript('trivia-pro-v27.js?v=20260912-pro5','data-party-pro-trivia-v27');
+      await loadScript('platform-pro-v27.js?v=20260912-pro5','data-party-pro-platform-v27');
+      await loadScript('games-pro-v27.js?v=20260912-pro5','data-party-pro-games-v27');
+      await loadScript('pro-fixes-v27.js?v=20260912-pro5','data-party-pro-fixes-v27');
+      await loadScript('pro-hotfix-v27.js?v=20260912-pro5','data-party-pro-hotfix-v27');
+      await loadScript('gift-v28.js?v=20260912-gift1','data-party-gift-v28');
       await loadScript('remote-v27.js?v=20260912-remote2','data-party-remote-v27');
     }catch(e){console.error('Party Night upgrade failed to load',e)}
   };
