@@ -1,0 +1,116 @@
+(()=>{
+'use strict';
+const C=window.PN_V27_CONTENT;if(!C||!window.PARTY_CONTENT)return;
+const MODES={
+ direct:{label:'❓ مباشر',source:'direct',pts:1},clues:{label:'🧩 من أنا؟',source:'clues',pts:3},list:{label:'📣 عدّد/مزايدة',source:'list',pts:1},speed:{label:'⚡ سرعة',source:'direct',pts:2},mcq:{label:'🔘 اختيارات',source:'direct',pts:1},steal:{label:'🎯 سرقة',source:'direct',pts:2},double:{label:'🔥 دبل',source:'direct',pts:2},
+ higher:{label:'↕️ أعلى/أقل',special:'higherLower',pts:1},timeline:{label:'🕐 خط زمني',special:'timeline',pts:2},closest:{label:'📏 الأقرب',special:'closest',pts:2},odd:{label:'🧠 المختلف',special:'odd',pts:1},fix:{label:'🛠️ صحّحها',special:'fix',pts:2},captain:{label:'🧢 الكابتن',source:'direct',pts:2}
+};
+const DIFFS=['easy','medium','hard','expert'];
+const S=window.triviaProState={active:false,a:0,b:0,round:0,limit:20,target:30,modes:[],schedule:[],packs:[],weights:{},diff:'medium',used:new Set(),current:null,mode:null,turn:'a',history:[],powers:{a:{swap:1,double:1,shield:1,hint:1},b:{swap:1,double:1,shield:1,hint:1}},boost:{a:1,b:1},shield:{a:false,b:false},finalEnabled:true,finalDone:false,finalJudge:{a:null,b:null}};
+const el=id=>document.getElementById(id);
+const qAnswer=q=>Array.isArray(q?.a)?q.a.join(' • '):String(q?.a??'');
+const packName=id=>PARTY_CONTENT.triviaPacks.find(p=>p.id===id)?.name||id;
+const teamName=t=>el(t==='a'?'teamA':'teamB')?.value||`الفريق ${t.toUpperCase()}`;
+const diffLabel=d=>({easy:'سهل',medium:'متوسط',hard:'صعب',expert:'محنكين',adaptive:'ذكي'}[d]||d);
+const shuffleLocal=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const choose=a=>a[Math.floor(Math.random()*a.length)];
+function selectedPacksV27(){return [...document.querySelectorAll('#triviaPacks .packBtn.selected')].map(b=>b.dataset.pack)}
+function selectedModesV27(){return [...document.querySelectorAll('#triviaModes .modeCard.selected')].map(b=>b.dataset.mode)}
+function balanced(modes,total){const out=[];while(out.length<total){let c=shuffleLocal(modes);if(out.length&&c.length>1&&c[0]===out[out.length-1]){const i=c.findIndex(x=>x!==out[out.length-1]);if(i>0)[c[0],c[i]]=[c[i],c[0]]}out.push(...c.slice(0,total-out.length))}return out}
+function setScore(){if(el('taScore'))el('taScore').textContent=S.a;if(el('tbScore'))el('tbScore').textContent=S.b;if(el('taName'))el('taName').textContent=teamName('a');if(el('tbName'))el('tbName').textContent=teamName('b')}
+function ensureUI(){
+ const modes=el('triviaModes');if(!modes)return;
+ modes.className='modeCards proModeCards';modes.innerHTML=Object.entries(MODES).map(([id,m],i)=>`<button type="button" class="modeCard ${i<5?'selected':''}" data-mode="${id}" onclick="this.classList.toggle('selected');updateTriviaProDistribution()"><b>${m.label}</b><small>${m.special?'جولة PRO':'من بنك الأسئلة'}</small></button>`).join('');
+ const host=modes.closest('.panel');if(host&&!el('triviaProOptions')){
+   const box=document.createElement('div');box.id='triviaProOptions';box.className='triviaBuilder proBuilder';box.innerHTML=`
+   <div class="sectionHead"><div><h3>⚙️ Match Builder PRO</h3><div class="tiny">تحكم كامل بالمباراة، الجولات، الباكات والنهائي.</div></div><span class="proBadge">PRO</span></div>
+   <div class="proGrid">
+    <label>عدد الأسئلة<select id="triviaProCount" onchange="updateTriviaProDistribution()"><option>10</option><option>15</option><option selected>20</option><option>24</option><option>30</option><option>40</option></select></label>
+    <label>الصعوبة<select id="triviaProDiff"><option value="adaptive" selected>ذكية Adaptive</option><option value="medium">متوسط</option><option value="hard">صعب</option><option value="expert">محنكين</option><option value="easy">سهل</option><option value="all">كل المستويات</option></select></label>
+    <label>وقت السؤال<select id="triviaProTime"><option value="0">بدون</option><option value="15">15 ث</option><option value="20" selected>20 ث</option><option value="30">30 ث</option><option value="45">45 ث</option></select></label>
+    <label>النهائي<select id="triviaProFinal"><option value="1" selected>مفعّل 🔥</option><option value="0">بدون نهائي</option></select></label>
+   </div>
+   <div id="triviaProDistribution" class="distributionPreview"></div>
+   <div class="sectionHead" style="margin-top:12px"><div><b>⚖️ وزن الباكات</b><div class="tiny">1x عادي • 2x يظهر أكثر • 3x أولوية</div></div><button class="ghost small" onclick="renderTriviaPackWeightsV27()">تحديث</button></div>
+   <div id="triviaPackWeightsV27" class="packWeightGrid"></div>
+   <div class="tiny proHint">💡 Power Cards لكل فريق: تبديل سؤال، دبل نقاط، درع ضد السرقة، وتلميح.</div>`;
+   const start=host.querySelector('button[onclick="startTrivia()"]');host.insertBefore(box,start);if(start)start.textContent='ابدأ Challenge 30 PRO 🔥';
+ }
+ ensurePlayUI();renderPackWeights();updateDistribution();
+}
+function ensurePlayUI(){const play=el('triviaPlay');if(!play)return;const panel=play.querySelector('.panel.center');if(!panel)return;
+ const old=panel.querySelector('.actions.wrap');if(old)old.classList.add('legacyTriviaActions');
+ if(!el('triviaProSpecial')){const x=document.createElement('div');x.id='triviaProSpecial';x.className='triviaSpecial hidden';el('triviaQ')?.after(x)}
+ if(!el('triviaProActions')){const a=document.createElement('div');a.id='triviaProActions';a.className='proActions';panel.appendChild(a)}
+ if(!el('triviaProPowers')){const p=document.createElement('div');p.id='triviaProPowers';p.className='proPowers panel';play.insertBefore(p,panel)}
+ if(!el('triviaProMasterLine')){const p=document.createElement('div');p.id='triviaProMasterLine';p.className='proMasterLine';panel.prepend(p)}
+}
+function renderPackWeights(){const box=el('triviaPackWeightsV27');if(!box)return;const ids=selectedPacksV27();box.innerHTML=ids.map(id=>`<label><span>${packName(id)}</span><select data-pack-weight="${id}" onchange="triviaProState.weights['${id}']=+this.value"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></label>`).join('')||'<span class="tiny">اختار باكات بالأعلى.</span>';ids.forEach(id=>{S.weights[id]??=1;const s=box.querySelector(`[data-pack-weight="${id}"]`);if(s)s.value=S.weights[id]})}
+window.renderTriviaPackWeightsV27=renderPackWeights;
+function updateDistribution(){const box=el('triviaProDistribution');if(!box)return;const m=selectedModesV27(),n=+el('triviaProCount')?.value||20;if(!m.length){box.innerHTML='<span>اختار نوع جولة</span>';return}const d={};balanced(m,n).forEach(x=>d[x]=(d[x]||0)+1);box.innerHTML=Object.entries(d).map(([id,c])=>`<span>${MODES[id]?.label}: <strong>${c}</strong></span>`).join('')}
+window.updateTriviaProDistribution=updateDistribution;
+document.addEventListener('click',e=>{if(e.target.closest?.('#triviaPacks .packBtn'))setTimeout(renderPackWeights,0)});
+function adaptiveDiff(){if(S.diff!=='adaptive')return S.diff;const progress=S.limit?S.round/S.limit:0;const lead=Math.abs(S.a-S.b);if(progress>.72||lead<2&&progress>.5)return 'hard';if(progress>.88)return 'expert';return progress<.25?'medium':lead>=5?'medium':'hard'}
+function weightedPack(){const bag=[];S.packs.forEach(id=>{const w=S.weights[id]||1;for(let i=0;i<w;i++)bag.push(id)});return choose(bag.length?bag:S.packs)}
+function usableQuestion(mode){const m=MODES[mode];if(m.special){const arr=C[m.special]||[];const avail=arr.map((x,i)=>({...x,_id:`${m.special}-${i}`,pack:'pro',difficulty:'hard'})).filter(x=>!S.used.has(x._id));const q=choose(avail.length?avail:arr.map((x,i)=>({...x,_id:`${m.special}-${i}`,pack:'pro',difficulty:'hard'})));if(q)S.used.add(q._id);return q}
+ let d=adaptiveDiff();const pack=weightedPack();let pool=PARTY_CONTENT.trivia.filter(q=>S.packs.includes(q.pack)&&q.type===m.source&&!q.duplicateOf&&!isReported(q.id));
+ if(pack)pool.sort((a,b)=>(a.pack===pack?-1:0)-(b.pack===pack?-1:0));if(d!=='all'){let f=pool.filter(q=>q.difficulty===d);if(!f.length&&d==='expert')f=pool.filter(q=>q.difficulty==='hard');if(!f.length&&d==='hard')f=pool.filter(q=>q.difficulty==='medium');if(f.length)pool=f}
+ let avail=pool.filter(q=>!S.used.has(q.id));if(!avail.length)avail=pool;if(!avail.length)return null;const q=choose(avail.slice(0,Math.max(8,Math.ceil(avail.length*.7))));S.used.add(q.id);return q}
+function isReported(id){try{return (JSON.parse(localStorage.getItem('pn.questionReports')||'[]')).some(r=>r.id===id&&r.hide)}catch{return false}}
+function renderPowers(){const p=el('triviaProPowers');if(!p)return;p.innerHTML=['a','b'].map(t=>`<div class="powerTeam"><b>${teamName(t)}</b><div>${[['swap','🔄','تبديل'],['double','✖️2','دبل'],['shield','🛡️','درع'],['hint','💡','تلميح']].map(([id,em,n])=>`<button ${S.powers[t][id]?``:'disabled'} onclick="useTriviaPowerV27('${t}','${id}')">${em} ${n}<small>${S.powers[t][id]}</small></button>`).join('')}</div></div>`).join('')}
+window.useTriviaPowerV27=function(t,id){if(!S.active||!S.powers[t][id])return;S.powers[t][id]--;
+ if(id==='swap'){nextQuestion(true);toast(`🔄 ${teamName(t)} بدّل السؤال`)}
+ if(id==='double'){S.boost[t]=2;toast(`✖️2 ${teamName(t)}: النقاط القادمة دبل`)}
+ if(id==='shield'){S.shield[t]=true;toast(`🛡️ ${teamName(t)} فعّل الدرع`)}
+ if(id==='hint'){revealHint();toast(`💡 تلميح لـ ${teamName(t)}`)}renderPowers()}
+function revealHint(){const q=S.current;if(!q)return;const a=qAnswer(q);const sp=el('triviaProSpecial');sp.classList.remove('hidden');if(S.mode==='mcq'){const wrong=[...sp.querySelectorAll('.mcqChoice')].filter(b=>!b.dataset.correct);wrong.slice(0,2).forEach(b=>b.classList.add('hidden'));return}sp.insertAdjacentHTML('beforeend',`<div class="proHintReveal">💡 يبدأ الجواب بـ <b>${a.trim().charAt(0)||'؟'}</b> • ${Math.max(1,a.split(/\s+/).length)} كلمة تقريبًا</div>`)}
+function start(){const packs=selectedPacksV27();const modes=selectedModesV27();if(!packs.length){toast('اختار باك واحد على الأقل');return}if(!modes.length){toast('اختار جولة واحدة على الأقل');return}
+ S.active=true;S.a=S.b=0;S.round=0;S.limit=+el('triviaProCount').value||20;S.target=+el('triviaTarget')?.value||30;S.modes=modes;S.schedule=balanced(modes,S.limit);S.packs=packs;S.diff=el('triviaProDiff').value;S.used=new Set();S.history=[];S.turn='a';S.powers={a:{swap:1,double:1,shield:1,hint:1},b:{swap:1,double:1,shield:1,hint:1}};S.boost={a:1,b:1};S.shield={a:false,b:false};S.finalEnabled=el('triviaProFinal').value==='1';S.finalDone=false;S.finalJudge={a:null,b:null};
+ [...document.querySelectorAll('[data-pack-weight]')].forEach(s=>S.weights[s.dataset.packWeight]=+s.value||1);el('triviaSetup').classList.add('hidden');el('triviaPlay').classList.remove('hidden');el('triviaPlay')?.querySelector('.panel.center')?.classList.remove('hidden');el('triviaFinishV24')?.classList.add('hidden');ensurePlayUI();setScore();renderPowers();nextQuestion(false);window.scrollTo({top:0,behavior:'smooth'})}
+window.startTrivia=start;
+function nextQuestion(replace=false){if(!S.active)return;if(!replace&&S.round>=S.limit){if(S.finalEnabled&&!S.finalDone)return startFinal();return finish()}
+ const mode=replace?S.mode:S.schedule[S.round];const q=usableQuestion(mode);if(!q){toast('المحتوى غير كافي لهذا الفلتر — وسّع الباكات أو الصعوبة');return}S.mode=mode;S.current=q;if(!replace){S.round++;S.turn=S.round%2?'a':'b'}
+ renderQuestion(q,mode);if(!replace)try{record('trivia',{type:mode,pack:q.pack||'pro',pro:true})}catch{}
+}
+window.nextTrivia=function(){nextQuestion(false)};window.replaceTriviaQuestionV24=function(){nextQuestion(true)};
+function renderQuestion(q,mode){closeTimer();setScore();const p=el('triviaMasterLineV24')||el('triviaProMasterLine');if(p)p.innerHTML=`<span>السؤال <b>${S.round}/${S.limit}</b></span><span>${MODES[mode].label}</span><span>دور: <b>${teamName(S.turn)}</b></span>`;
+ if(el('triviaRoundLabel'))el('triviaRoundLabel').textContent=`${S.round}/${S.limit}`;if(el('triviaPack'))el('triviaPack').textContent=q.pack==='pro'?'PRO':packName(q.pack);if(el('triviaDiff'))el('triviaDiff').textContent=diffLabel(q.difficulty||adaptiveDiff());if(el('triviaMode'))el('triviaMode').textContent=MODES[mode].label.replace(/^\S+\s/,'');if(el('triviaQ'))el('triviaQ').textContent=q.q||'—';if(el('triviaA')){el('triviaA').classList.add('hidden');el('triviaA').innerHTML=qAnswer(q)}if(el('triviaHints'))el('triviaHints').innerHTML='';if(el('triviaBidBox'))el('triviaBidBox').classList.add('hidden');
+ const sp=el('triviaProSpecial');sp.classList.add('hidden');sp.innerHTML='';renderMode(q,mode,sp);renderActions();renderPowers();const sec=mode==='speed'?12:(+el('triviaProTime')?.value||0);if(sec)startLocalTimer(sec,sp)}
+function renderMode(q,mode,sp){
+ if(mode==='clues'){sp.classList.remove('hidden');(q.hints||[]).forEach((h,i)=>sp.insertAdjacentHTML('beforeend',`<button class="ghost wide proHintBtn" onclick="this.outerHTML='<div class=&quot;hint&quot;>${i+1}. ${String(h).replace(/'/g,"&#39;")}</div>'">كشف التلميح ${i+1}</button>`))}
+ if(mode==='list'){if(el('triviaBidBox')){el('triviaBidBox').classList.remove('hidden');const b=el('triviaBid');if(b)b.textContent=q.min||3}}
+ if(mode==='mcq'){sp.classList.remove('hidden');const correct=qAnswer(q);let pool=PARTY_CONTENT.trivia.filter(x=>x.type==='direct'&&!Array.isArray(x.a)&&x.id!==q.id&&S.packs.includes(x.pack));let wrong=shuffleLocal([...new Set(pool.map(qAnswer).filter(x=>x&&x!==correct))]).slice(0,3);while(wrong.length<3)wrong.push(['لا شيء مما سبق','جميع ما سبق','غير معروف'][wrong.length]);const opts=shuffleLocal([correct,...wrong]);sp.innerHTML=`<div class="mcqGrid">${opts.map(o=>`<button class="mcqChoice" data-correct="${o===correct?'1':''}" onclick="selectMcqV27(this)">${o}</button>`).join('')}</div>`}
+ if(mode==='higher'){sp.classList.remove('hidden');sp.innerHTML='<div class="choiceDuel"><button onclick="markSpecialChoiceV27(this,\'أكبر\')">أكبر / بعد</button><button onclick="markSpecialChoiceV27(this,\'أصغر\')">أصغر / قبل</button></div>'}
+ if(mode==='odd'){sp.classList.remove('hidden');sp.innerHTML=`<div class="mcqGrid">${q.options.map(o=>`<button class="mcqChoice" onclick="markSpecialChoiceV27(this,'${String(o).replace(/'/g,"\\'")}')">${o}</button>`).join('')}</div>`}
+ if(mode==='timeline'){sp.classList.remove('hidden');const arr=shuffleLocal(q.items);sp.innerHTML=`<div class="tiny">اضغط العناصر بالترتيب</div><div class="timelineChoices">${arr.map(o=>`<button onclick="timelinePickV27(this,'${String(o).replace(/'/g,"\\'")}')">${o}</button>`).join('')}</div><div id="timelinePickedV27" class="timelinePicked"></div><button class="ghost wide" onclick="resetTimelineV27()">↶ إعادة الترتيب</button>`;S.timelinePick=[]}
+ if(mode==='closest'){sp.classList.remove('hidden');sp.innerHTML=`<div class="closestGrid"><label>${teamName('a')}<input id="closestA" inputmode="numeric" placeholder="تخمين"></label><label>${teamName('b')}<input id="closestB" inputmode="numeric" placeholder="تخمين"></label></div><button class="gold wide" onclick="judgeClosestV27()">📏 احسب الأقرب</button>`}
+ if(mode==='fix'){sp.classList.remove('hidden');sp.innerHTML='<div class="tiny">في الجملة خطأ واحد — صحّحوه بدقة.</div>'}
+ if(mode==='captain'){sp.classList.remove('hidden');const name=state.names.length?choose(state.names):teamName(S.turn);sp.innerHTML=`<div class="captainCard">🧢 كابتن الجولة: <b>${name}</b><small>الكابتن يعطي الجواب النهائي للفريق.</small></div>`}
+ if(mode==='steal'){sp.classList.remove('hidden');sp.innerHTML=`<div class="stealNotice">🎯 ${teamName(S.turn)} يبدأ • إذا أخطأ، الفريق الثاني يقدر يسرق.</div>`}
+ if(mode==='double'){sp.classList.remove('hidden');sp.innerHTML='<div class="doubleNotice">🔥 هذه الجولة بنقطتين.</div>'}
+}
+window.selectMcqV27=function(btn){[...btn.parentElement.children].forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')};
+window.markSpecialChoiceV27=function(btn,val){[...btn.parentElement.children].forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');S.specialChoice=val};
+window.timelinePickV27=function(btn,val){if(S.timelinePick.includes(val))return;S.timelinePick.push(val);btn.disabled=true;el('timelinePickedV27').innerHTML=S.timelinePick.map((x,i)=>`<span>${i+1}. ${x}</span>`).join('')};window.resetTimelineV27=function(){S.timelinePick=[];renderQuestion(S.current,S.mode)};
+window.judgeClosestV27=function(){const a=+el('closestA').value,b=+el('closestB').value,trueV=+S.current.a;if(!Number.isFinite(a)||!Number.isFinite(b)){toast('اكتب تخمين الفريقين');return}const da=Math.abs(a-trueV),db=Math.abs(b-trueV);reveal();if(da===db){award('a',1);award('b',1);toast('تعادل — نقطة لكل فريق')}else award(da<db?'a':'b',2)};
+function startLocalTimer(sec,sp){sp.classList.remove('hidden');sp.insertAdjacentHTML('beforeend',`<div class="proTimer" id="proTriviaTimer">${sec}</div>`);try{countdown(el('proTriviaTimer'),Math.round(sec*(state.settings.timerMultiplier||1)),()=>toast('⏱ انتهى الوقت'))}catch{}}
+function renderActions(){const a=el('triviaProActions');if(!a)return;a.innerHTML=`<div class="actions wrap"><button class="gold" onclick="toggleTriviaAnswer()">👁 كشف</button><button class="primary" onclick="awardTrivia('a')">+ ${teamName('a')}</button><button class="primary" onclick="awardTrivia('b')">+ ${teamName('b')}</button><button class="ghost" onclick="nextTrivia()">التالي ⏭</button></div><div class="triviaTools"><button class="ghost" onclick="replaceTriviaQuestionV24()">🔄 تبديل</button><button class="ghost" onclick="undoTriviaAwardV24()">↶ تراجع</button><button class="ghost" onclick="reportTriviaV27()">🚩 مشكلة</button></div>`}
+function reveal(){const q=S.current;if(!q)return;el('triviaA')?.classList.remove('hidden');const sp=el('triviaProSpecial');
+ if(S.mode==='timeline'){sp.classList.remove('hidden');sp.insertAdjacentHTML('beforeend',`<div class="proExplanation">✅ ${q.a.join(' ← ')}</div>`)}
+ if(S.mode==='odd'){sp.classList.remove('hidden');sp.insertAdjacentHTML('beforeend',`<div class="proExplanation">✅ المختلف: <b>${q.a}</b>${q.why?`<small>${q.why}</small>`:''}</div>`)}
+ if(S.mode==='higher'){sp.classList.remove('hidden');sp.insertAdjacentHTML('beforeend',`<div class="proExplanation">✅ ${q.a}${q.why?`<small>${q.why}</small>`:''}</div>`)}
+ if(q.why)sp.insertAdjacentHTML('beforeend',`<div class="proExplanation">💡 ${q.why}</div>`);if(q.explain)sp.insertAdjacentHTML('beforeend',`<div class="proExplanation">ℹ️ ${q.explain}</div>`)}
+window.toggleTriviaAnswer=function(){reveal()};
+function basePoints(){if(S.mode==='clues'){const used=[...document.querySelectorAll('#triviaProSpecial .hint')].length;return Math.max(1,3-used)}if(S.mode==='list')return Math.max(1,+el('triviaBid')?.textContent||S.current?.min||1);return MODES[S.mode]?.pts||1}
+function award(t,forced){let pts=forced??basePoints();if(S.mode==='steal'&&t!==S.turn){pts=S.shield[S.turn]?1:2;S.shield[S.turn]=false}pts*=S.boost[t]||1;S.boost[t]=1;S[t]+=pts;S.history.push({round:S.round,t,pts,q:S.current?.id||S.current?._id,mode:S.mode});setScore();renderPowers();beep?.(820,.08);buzz?.(35);toast(`+${pts} ${teamName(t)}`);if(S.target&&S[t]>=S.target&&S.round>=Math.min(5,S.limit)){if(S.finalEnabled&&!S.finalDone)startFinal();else finish()}}
+window.awardTrivia=function(t){award(t)};
+window.undoTriviaAwardV24=function(){const h=S.history.pop();if(!h){toast('ما في نقطة للتراجع');return}S[h.t]=Math.max(0,S[h.t]-h.pts);setScore();toast('↶ تم التراجع عن آخر نقطة')};
+window.changeBid=function(d){const b=el('triviaBid');if(!b)return;b.textContent=Math.max(1,(+b.textContent||3)+d)};
+window.reportTriviaV27=function(){if(!S.current)return;const reason=prompt('شو المشكلة؟\n1 سهل زيادة\n2 معلومة غلط\n3 سؤال غامض\n4 مكرر\n5 غير مناسب');if(!reason)return;let arr=[];try{arr=JSON.parse(localStorage.getItem('pn.questionReports')||'[]')}catch{}arr.push({id:S.current.id||S.current._id,q:S.current.q,reason,hide:['2','3','4','5'].includes(reason),at:Date.now()});localStorage.setItem('pn.questionReports',JSON.stringify(arr.slice(-300)));toast('🚩 تم حفظ الملاحظة للمراجعة')};
+function startFinal(){S.finalDone=true;closeTimer();const q=choose(C.finals.filter(x=>S.packs.includes(x.pack)||x.pack==='general')||C.finals);S.mode='final';S.current=q;const panel=el('triviaPlay')?.querySelector('.panel.center');panel?.classList.remove('hidden');if(el('triviaQ'))el('triviaQ').textContent=q.q;if(el('triviaPack'))el('triviaPack').textContent='FINAL';if(el('triviaMode'))el('triviaMode').textContent='🔥 النهائي';if(el('triviaDiff'))el('triviaDiff').textContent='مخاطرة';el('triviaA')?.classList.add('hidden');if(el('triviaA'))el('triviaA').textContent=q.a;const sp=el('triviaProSpecial');sp.classList.remove('hidden');sp.innerHTML=`<div class="finalHero">🔥 الجولة النهائية</div><p>كل فريق يختار مخاطرة 1–5 نقاط قبل كشف الإجابة.</p><div class="closestGrid"><label>${teamName('a')}<select id="riskA">${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join('')}</select></label><label>${teamName('b')}<select id="riskB">${[1,2,3,4,5].map(n=>`<option>${n}</option>`).join('')}</select></label></div>`;const a=el('triviaProActions');a.innerHTML=`<button class="gold wide" onclick="toggleTriviaAnswer()">👁 كشف الإجابة</button><div class="finalJudgeGrid"><button onclick="judgeFinalV27('a',true)">✅ ${teamName('a')} صح</button><button onclick="judgeFinalV27('a',false)">❌ ${teamName('a')} غلط</button><button onclick="judgeFinalV27('b',true)">✅ ${teamName('b')} صح</button><button onclick="judgeFinalV27('b',false)">❌ ${teamName('b')} غلط</button></div>`}
+window.judgeFinalV27=function(t,ok){if(S.finalJudge[t]!==null){toast('تم تقييم هذا الفريق');return}const risk=+el(t==='a'?'riskA':'riskB').value||1;S.finalJudge[t]=ok;if(ok)S[t]+=risk;else S[t]=Math.max(0,S[t]-risk);setScore();if(S.finalJudge.a!==null&&S.finalJudge.b!==null)setTimeout(finish,450)};
+function finish(){S.active=false;closeTimer();const a=S.a,b=S.b,an=teamName('a'),bn=teamName('b');const winner=a===b?null:(a>b?an:bn);const play=el('triviaPlay'),panel=play?.querySelector('.panel.center');panel?.classList.add('hidden');let f=el('triviaFinishV24');if(!f){f=document.createElement('div');f.id='triviaFinishV24';f.className='panel triviaFinish';play?.appendChild(f)}f.classList.remove('hidden');f.innerHTML=`<div class="finishCup">${winner?'🏆':'🤝'}</div><h2>${winner?`${winner} بطل المباراة!`:'تعادل ناري!'}</h2><div class="finishScore"><div>${an}<b>${a}</b></div><div>${bn}<b>${b}</b></div></div><div class="proRecapMini">${S.history.slice(-6).map(h=>`<span>${MODES[h.mode]?.label||h.mode} +${h.pts}</span>`).join('')}</div><div class="actions wrap"><button class="primary" onclick="startTrivia()">🔁 إعادة</button><button class="gold" onclick="editTriviaProV27()">⚙️ تعديل</button><button class="ghost" onclick="home()">الرئيسية</button></div>`;try{window.PNSeason?.onGameEnd?.('trivia',{winner,a,b})}catch{}}
+window.editTriviaProV27=function(){S.active=false;closeTimer();el('triviaPlay')?.classList.add('hidden');el('triviaSetup')?.classList.remove('hidden');el('triviaFinishV24')?.classList.add('hidden');el('triviaPlay')?.querySelector('.panel.center')?.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})};
+try{const s=el('triviaDifficulty');if(s&&!s.querySelector('option[value="adaptive"]'))s.insertAdjacentHTML('afterbegin','<option value="adaptive">ذكي Adaptive</option>')}catch{}
+setTimeout(ensureUI,0);window.addEventListener('pageshow',()=>setTimeout(ensureUI,20));
+})();
