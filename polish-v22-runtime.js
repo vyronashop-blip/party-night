@@ -35,13 +35,14 @@
       await loadScript('trivia-v24.js?v=20260912-matchbuilder1','data-party-trivia-v24');
       await loadScript('content-v26.js?v=20260912-world1','data-party-content-v26');
       await loadScript('games-v26.js?v=20260912-world1','data-party-games-v26');
-      await loadScript('pro-content-v27.js?v=20260912-pro5','data-party-pro-content-v27');
-      await loadScript('trivia-pro-v27.js?v=20260912-pro5','data-party-pro-trivia-v27');
-      await loadScript('platform-pro-v27.js?v=20260912-pro5','data-party-pro-platform-v27');
-      await loadScript('games-pro-v27.js?v=20260912-pro5','data-party-pro-games-v27');
-      await loadScript('pro-fixes-v27.js?v=20260912-pro5','data-party-pro-fixes-v27');
-      await loadScript('pro-hotfix-v27.js?v=20260912-pro5','data-party-pro-hotfix-v27');
-      await loadScript('gift-v28.js?v=20260912-gift1','data-party-gift-v28');
+      await loadScript('pro-content-v27.js?v=20260912-pro6','data-party-pro-content-v27');
+      await loadScript('trivia-pro-v27.js?v=20260912-pro6','data-party-pro-trivia-v27');
+      await loadScript('platform-pro-v27.js?v=20260912-pro6','data-party-pro-platform-v27');
+      await loadScript('games-pro-v27.js?v=20260912-pro6','data-party-pro-games-v27');
+      await loadScript('pro-fixes-v27.js?v=20260912-pro6','data-party-pro-fixes-v27');
+      await loadScript('pro-hotfix-v27.js?v=20260912-pro6','data-party-pro-hotfix-v27');
+      await loadScript('gift-v28.js?v=20260912-gift2','data-party-gift-v28');
+      await loadScript('final-polish-v28.js?v=20260912-gift2','data-party-final-polish-v28');
       await loadScript('remote-v27.js?v=20260912-remote2','data-party-remote-v27');
     }catch(e){console.error('Party Night upgrade failed to load',e)}
   };
