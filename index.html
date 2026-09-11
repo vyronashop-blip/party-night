@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#07111f">
+  <meta name="author" content="يزن عبد الحليم">
+  <meta name="description" content="ليلة التحدي — مجموعة ألعاب سهرة جماعية من صنع وتطوير يزن عبد الحليم.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ليلة التحدي">
@@ -15,12 +17,13 @@
 <div class="app">
   <header class="topbar">
     <div>
-      <div class="brand">🎉 ليلة التحدي <span class="version">V2</span></div>
+      <div class="brand">🎉 ليلة التحدي <span class="version">V2.1</span></div>
       <div class="muted" id="sessionSubtitle">جهاز واحد • 2–10 لاعبين • تعمل بدون إنترنت</div>
     </div>
     <div class="headerActions">
       <span class="statusDot" id="onlineDot"></span>
       <button class="iconBtn" onclick="showSession()" aria-label="ملخص السهرة">🏆</button>
+      <button class="iconBtn" onclick="showAbout()" aria-label="عن اللعبة">ℹ️</button>
       <button class="iconBtn" onclick="showSettings()" aria-label="الإعدادات">⚙️</button>
     </div>
   </header>
@@ -48,12 +51,16 @@
 
       <div class="quickRow">
         <button class="quickCard" onclick="newNight()"><span>✨</span><b>سهرة جديدة</b><small>تصفير التكرار والإحصائيات</small></button>
-        <button class="quickCard" onclick="quickMix()"><span>🎲</span><b>اختيار عشوائي</b><small>اللعبة تختار لكم</small></button>
+        <button class="quickCard" onclick="showPresets()"><span>🎛️</span><b>سهرة جاهزة</b><small>كروية، عائلية، محنكين وأكثر</small></button>
+        <button class="quickCard" onclick="showChampionship()"><span>🏆</span><b>بطولة السهرة</b><small>عدة ألعاب ومتصدر واحد</small></button>
+        <button class="quickCard" onclick="quickMix()"><span>🎲</span><b>اختيار عشوائي</b><small>من ألعاب الوضع الحالي</small></button>
         <button class="quickCard" onclick="showSession()"><span>📊</span><b>ملخص السهرة</b><small>نقاط وأرقام وجوائز</small></button>
       </div>
+      <div id="presetStatus" class="presetStatus"></div>
 
       <div class="sectionTitle"><h2>الألعاب</h2><span id="contentCount" class="pill"></span></div>
       <div class="grid" id="gameGrid"></div>
+      <footer class="creatorFooter" onclick="showAbout()"><span>✨ لعبة من صنع وتطوير</span><b>يزن عبد الحليم</b><small>Party Night • 2026</small></footer>
     </section>
 
     <section id="trivia" class="screen">
@@ -139,10 +146,14 @@
 <div id="helpModal" class="modal" onclick="if(event.target===this)closeModal('helpModal')"><div class="modalCard"><div class="nav"><div class="big" id="helpTitle"></div><button class="ghost" onclick="closeModal('helpModal')">إغلاق</button></div><div id="helpBody"></div></div></div>
 <div id="sessionModal" class="modal" onclick="if(event.target===this)closeModal('sessionModal')"><div class="modalCard"><div class="nav"><div class="big">🏆 ملخص السهرة</div><button class="ghost" onclick="closeModal('sessionModal')">إغلاق</button></div><div id="sessionBody"></div></div></div>
 <div id="settingsModal" class="modal" onclick="if(event.target===this)closeModal('settingsModal')"><div class="modalCard"><div class="nav"><div class="big">⚙️ الإعدادات</div><button class="ghost" onclick="closeModal('settingsModal')">إغلاق</button></div><div id="settingsBody"></div></div></div>
+<div id="presetModal" class="modal" onclick="if(event.target===this)closeModal('presetModal')"><div class="modalCard"><div class="nav"><div class="big">🎛️ سهرات جاهزة</div><button class="ghost" onclick="closeModal('presetModal')">إغلاق</button></div><div id="presetBody"></div></div></div>
+<div id="champModal" class="modal" onclick="if(event.target===this)closeModal('champModal')"><div class="modalCard"><div class="nav"><div class="big">🏆 بطولة السهرة</div><button class="ghost" onclick="closeModal('champModal')">إغلاق</button></div><div id="champBody"></div></div></div>
+<div id="aboutModal" class="modal" onclick="if(event.target===this)closeModal('aboutModal')"><div class="modalCard aboutCard"><div class="nav"><div class="big">ℹ️ عن اللعبة</div><button class="ghost" onclick="closeModal('aboutModal')">إغلاق</button></div><div id="aboutBody"></div></div></div>
 <div id="toast" class="toast"></div>
 
 <script src="data.js"></script>
 <script src="content-v2.js"></script>
 <script src="app.js"></script>
+<script src="v21.js"></script>
 </body>
 </html>
