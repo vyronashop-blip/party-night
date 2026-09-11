@@ -1,4 +1,5 @@
 'use strict';
+const v21Style=document.createElement('link');v21Style.rel='stylesheet';v21Style.href='v21.css';document.head.appendChild(v21Style);
 
 const PARTY_PRESETS={
   football:{name:'سهرة كروية',emoji:'⚽',desc:'كرة قدم من البداية للنهاية',games:['trivia','player','fake','taboo','bomb'],trivia:['football-general','ucl','world-cup','barca','madrid','premier','football-expert'],players:['modern','legends','barca','madrid','premier','ucl'],target:30,diff:'all'},
