@@ -1,0 +1,33 @@
+name: Party Night Quality Gate
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in *.js; do
+            echo "Checking $file"
+            node --check "$file"
+          done
+      - name: Verify required production files
+        shell: bash
+        run: |
+          test -f index.html
+          test -f manifest.webmanifest
+          test -f sw.js
+          test -f pro-v27.css
+          test -f trivia-pro-v27.js
+          test -f platform-pro-v27.js
+          test -f games-pro-v27.js
