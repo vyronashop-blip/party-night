@@ -1,0 +1,1 @@
+(()=>{'use strict';try{if(typeof PARTY_CONTENT!=='undefined')window.PARTY_CONTENT=PARTY_CONTENT}catch(e){console.error('Mega bridge PARTY_CONTENT',e)}try{if(typeof GAME_DEFS!=='undefined')window.GAME_DEFS=GAME_DEFS}catch(e){console.error('Mega bridge GAME_DEFS',e)}try{if(typeof HELP!=='undefined')window.PARTY_HELP=HELP}catch{};})();
