@@ -8,7 +8,8 @@
       try{fakeState={};syncState={};scaleState={};tabooState={};drawState={};bowlState={};bombState={}}catch{}
       const hide=id=>document.getElementById(id)?.classList.add('hidden');
       const show=id=>document.getElementById(id)?.classList.remove('hidden');
-      show('triviaSetup');hide('triviaPlay');
+      show('triviaSetup');hide('triviaPlay');hide('triviaFinishV24');
+      document.querySelector('#triviaPlay .panel.center')?.classList.remove('hidden');
       ['fakePass','fakeDebate','fakeVote','fakeReveal','syncTurn','syncResults','scaleLeader','scaleGuess','scaleReveal','tabooPlay','drawPass','drawTask','drawReveal','bowlPlay','bowlEnd','bombPlay','bombResult','playerPass','playerCard'].forEach(hide);
       ['taScore','tbScore','tabAScore','tabBScore','bowlAScore','bowlBScore'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='0'});
       const round=document.getElementById('triviaRoundLabel');if(round)round.textContent='جولة';
@@ -21,9 +22,17 @@
       toast('✨ بدأت سهرة جديدة من الصفر!');
     };
   };
+  const loadTriviaUpgrade=()=>{
+    if(document.querySelector('script[data-party-trivia-v24]'))return;
+    const s=document.createElement('script');
+    s.src='trivia-v24.js?v=20260912-matchbuilder1';
+    s.dataset.partyTriviaV24='1';
+    s.onerror=()=>console.error('Trivia Match Builder failed to load');
+    document.head.appendChild(s);
+  };
   const core=document.createElement('script');
   core.src='polish-v22-runtime-core.js?v=20260912-hotfix1';
-  core.onload=installNewNightFix;
-  core.onerror=()=>{console.error('V2.2 core failed to load');installNewNightFix()};
+  core.onload=()=>{installNewNightFix();loadTriviaUpgrade()};
+  core.onerror=()=>{console.error('V2.2 core failed to load');installNewNightFix();loadTriviaUpgrade()};
   document.head.appendChild(core);
 })();
