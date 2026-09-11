@@ -22,13 +22,15 @@
       toast('✨ بدأت سهرة جديدة من الصفر!');
     };
   };
-  const loadTriviaUpgrade=()=>{
-    if(document.querySelector('script[data-party-trivia-v24]'))return;
-    const s=document.createElement('script');
-    s.src='trivia-v24.js?v=20260912-matchbuilder1';
-    s.dataset.partyTriviaV24='1';
-    s.onerror=()=>console.error('Trivia Match Builder failed to load');
-    document.head.appendChild(s);
+  const loadScript=(src,attr)=>new Promise((resolve,reject)=>{
+    if(document.querySelector(`script[${attr}]`)){resolve();return}
+    const s=document.createElement('script');s.src=src;s.setAttribute(attr,'1');s.onload=resolve;s.onerror=reject;document.head.appendChild(s)
+  });
+  const loadTriviaUpgrade=async()=>{
+    try{
+      await loadScript('content-hardening-v25.js?v=20260912-hardening1','data-party-hardening-v25');
+      await loadScript('trivia-v24.js?v=20260912-matchbuilder1','data-party-trivia-v24');
+    }catch(e){console.error('Trivia upgrade failed to load',e)}
   };
   const core=document.createElement('script');
   core.src='polish-v22-runtime-core.js?v=20260912-hotfix1';
