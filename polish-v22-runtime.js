@@ -44,8 +44,9 @@
       await loadScript('pro-hotfix-v27.js?v=20260912-pro6','data-party-pro-hotfix-v27');
       await loadScript('gift-v28.js?v=20260912-gift2','data-party-gift-v28');
       await loadScript('final-polish-v28.js?v=20260912-gift2','data-party-final-polish-v28');
-      loadStyle('mega-v29.css?v=20260912-mega1','megaV29Style');
-      await loadScript('mega-content-v29.js?v=20260912-mega1','data-party-mega-v29');
+      loadStyle('mega-v29.css?v=20260912-mega2','megaV29Style');
+      await loadScript('mega-bridge-v29.js?v=20260912-mega2','data-party-mega-bridge-v29');
+      await loadScript('mega-content-v29.js?v=20260912-mega2','data-party-mega-v29');
       await loadScript('remote-v27.js?v=20260912-remote2','data-party-remote-v27');
     }catch(e){console.error('Party Night upgrade failed to load',e)}
   };
