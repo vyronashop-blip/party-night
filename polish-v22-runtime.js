@@ -12,10 +12,11 @@
       const show=id=>document.getElementById(id)?.classList.remove('hidden');
       show('triviaSetup');hide('triviaPlay');hide('triviaFinishV24');
       document.querySelector('#triviaPlay .panel.center')?.classList.remove('hidden');
-      ['fakePass','fakeDebate','fakeVote','fakeReveal','syncTurn','syncResults','scaleLeader','scaleGuess','scaleReveal','tabooPlay','drawPass','drawTask','drawReveal','bowlPlay','bowlEnd','bombPlay','bombResult','playerPass','playerCard','fiveStage','majorityStage','orderStage','emojiStage','estimateStage','memoryStage','whisperStage','courtStage','pitchStage','forbiddenStage','missionStage','chainStage','whoStage','convStage'].forEach(hide);
+      ['fakePass','fakeDebate','fakeVote','fakeReveal','syncTurn','syncResults','scaleLeader','scaleGuess','scaleReveal','tabooPlay','drawPass','drawTask','drawReveal','bowlPlay','bowlEnd','bombPlay','bombResult','playerPass','playerCard','fiveStage','majorityStage','orderStage','emojiStage','estimateStage','memoryStage','whisperStage','courtStage','pitchStage','forbiddenStage','missionStage','chainStage','whoStage','convStage','bidStage','splitStage','riskStage','trapStage','memStage'].forEach(hide);
       ['taScore','tbScore','tabAScore','tabBScore','bowlAScore','bowlBScore'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='0'});
       const round=document.getElementById('triviaRoundLabel');if(round)round.textContent='جولة';
       document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));
+      try{window.PN_CONTENT_MODE?.apply('all')}catch{}
       try{persist()}catch{}
       try{home()}catch{try{showScreen('home')}catch{}}
       try{renderNames()}catch{}
@@ -52,6 +53,12 @@
       await loadScript('party-os-hotfix-v30.js?v=20260912-partyos3','data-party-os-hotfix-v30');
       loadStyle('party-personalize-v30.css?v=20260912-partyos3','partyPersonalizeV30Style');
       await loadScript('party-personalize-v30.js?v=20260912-partyos3','data-party-personalize-v30');
+      await loadScript('platform-foundation-v31.js?v=20260912-foundation1','data-party-foundation-v31');
+      await loadScript('content-modes-v31.js?v=20260912-foundation1','data-party-content-modes-v31');
+      await loadScript('duel-content-v31.js?v=20260912-duel1','data-party-duel-content-v31');
+      loadStyle('duel-v31.css?v=20260912-duel1','duelV31Style');
+      await loadScript('duel-games-v31.js?v=20260912-duel1','data-party-duel-games-v31');
+      await loadScript('party-director-v31.js?v=20260912-director1','data-party-director-v31');
       await loadScript('remote-v27.js?v=20260912-remote2','data-party-remote-v27');
     }catch(e){console.error('Party Night upgrade failed to load',e)}
   };
