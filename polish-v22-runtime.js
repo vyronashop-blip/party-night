@@ -53,12 +53,15 @@
       await loadScript('party-os-hotfix-v30.js?v=20260912-partyos3','data-party-os-hotfix-v30');
       loadStyle('party-personalize-v30.css?v=20260912-partyos3','partyPersonalizeV30Style');
       await loadScript('party-personalize-v30.js?v=20260912-partyos3','data-party-personalize-v30');
-      await loadScript('platform-foundation-v31.js?v=20260912-foundation1','data-party-foundation-v31');
-      await loadScript('content-modes-v31.js?v=20260912-foundation1','data-party-content-modes-v31');
-      await loadScript('duel-content-v31.js?v=20260912-duel1','data-party-duel-content-v31');
-      loadStyle('duel-v31.css?v=20260912-duel1','duelV31Style');
-      await loadScript('duel-games-v31.js?v=20260912-duel1','data-party-duel-games-v31');
-      await loadScript('party-director-v31.js?v=20260912-director1','data-party-director-v31');
+      await loadScript('platform-foundation-v31.js?v=20260912-foundation2','data-party-foundation-v31');
+      await loadScript('content-modes-v31.js?v=20260912-foundation2','data-party-content-modes-v31');
+      await loadScript('duel-content-v31.js?v=20260912-duel2','data-party-duel-content-v31');
+      loadStyle('duel-v31.css?v=20260912-duel2','duelV31Style');
+      await loadScript('duel-games-v31.js?v=20260912-duel2','data-party-duel-games-v31');
+      await loadScript('party-director-v31.js?v=20260912-director2','data-party-director-v31');
+      await loadScript('foundation-hotfix-v31.js?v=20260912-foundation2','data-party-foundation-hotfix-v31');
+      loadStyle('duel-hub-v31.css?v=20260912-duel2','duelHubV31Style');
+      await loadScript('duel-hub-v31.js?v=20260912-duel2','data-party-duel-hub-v31');
       await loadScript('remote-v27.js?v=20260912-remote2','data-party-remote-v27');
     }catch(e){console.error('Party Night upgrade failed to load',e)}
   };
