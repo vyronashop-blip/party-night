@@ -1,4 +1,4 @@
-name: Party Night Quality Gate
+name: Party Night Public Build Quality Gate
 on:
   push:
     branches: [main]
@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 jobs:
-  syntax:
+  public-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
             echo "Checking $file"
             node --check "$file"
           done
-      - name: Verify required production files
+      - name: Verify public runtime package
         shell: bash
         run: |
           set -euo pipefail
@@ -42,7 +42,6 @@ jobs:
           test -f identity-v31.js
           test -f duel-v31.css
           test -f duel-hub-v31.css
-          test -f docs/PRODUCT-ARCHITECTURE-v31.md
           grep -q "platform-foundation-v31.js" polish-v22-runtime.js
           grep -q "duel-games-v31.js" polish-v22-runtime.js
           grep -q "party-director-v31.js" polish-v22-runtime.js
@@ -51,3 +50,13 @@ jobs:
           grep -q "identity-v31.js" polish-v22-runtime.js
           grep -q "platform-foundation-v31.js" sw.js
           grep -q "duel-hub-v31.js" sw.js
+      - name: Verify private-source material is absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e README.md
+          test ! -e docs
+          test ! -e package.json
+          test ! -e scripts
+          test ! -e tests
+          test ! -e packages
