@@ -1,0 +1,1 @@
+(()=>{"use strict";window.PN_DUEL_WAVE_HOTFIX_V32={version:32,refreshCards(){try{renderGameGrid?.()}catch{}try{window.renderGameLibraryV30?.()}catch{}setTimeout(()=>window.PN_I18N?.translate?.(document.body),30)}},window.addEventListener("pn:locale",()=>setTimeout(()=>window.PN_DUEL_WAVE_HOTFIX_V32.refreshCards(),80))})();

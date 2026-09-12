@@ -1,0 +1,1 @@
+(()=>{"use strict";const e="V2.2";function t(){document.querySelectorAll(".version").forEach(t=>{t.textContent!==e&&(t.textContent=e)}),document.documentElement.dataset.publicVersion=e}window.PN_PUBLIC_VERSION={value:e,apply:t},"loading"===document.readyState?document.addEventListener("DOMContentLoaded",t,{once:!0}):t(),setTimeout(t,500),setTimeout(t,1800)})();
