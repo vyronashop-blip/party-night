@@ -37,8 +37,14 @@ jobs:
           test -f duel-content-v31.js
           test -f duel-games-v31.js
           test -f party-director-v31.js
+          test -f foundation-hotfix-v31.js
+          test -f duel-hub-v31.js
           test -f duel-v31.css
+          test -f duel-hub-v31.css
           grep -q "platform-foundation-v31.js" polish-v22-runtime.js
           grep -q "duel-games-v31.js" polish-v22-runtime.js
           grep -q "party-director-v31.js" polish-v22-runtime.js
+          grep -q "foundation-hotfix-v31.js" polish-v22-runtime.js
+          grep -q "duel-hub-v31.js" polish-v22-runtime.js
           grep -q "platform-foundation-v31.js" sw.js
+          grep -q "duel-hub-v31.js" sw.js
