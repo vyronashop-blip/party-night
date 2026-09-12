@@ -1,0 +1,6 @@
+(()=>{
+'use strict';
+function refresh(){const total=GAME_DEFS.length;const hero=document.querySelector('.matchHeroCopy p');if(hero)hero.textContent=`${total} لعبة، 6000+ سؤال ومهمة، ألعاب لاعبين، Challenge 30 PRO، Party Director، TV وRemote Room Beta — من سهرة سريعة لماراثون ألعاب.`;const count=document.getElementById('contentCount');if(count)count.textContent=`${total} لعبة • 6000+ سؤال ومهمة`;const sub=document.getElementById('sessionSubtitle');if(sub)sub.textContent='2–10+ لاعبين • هاتف واحد الآن • Multi-device Beta • Offline-first'}
+const previous=window.showAbout;window.showAbout=function(){previous?.();setTimeout(()=>{const b=document.getElementById('aboutBody');if(!b)return;const total=GAME_DEFS.length;const facts=b.querySelector('.aboutFacts');if(facts)facts.innerHTML=`<div><b>${total}</b><span>لعبة اجتماعية</span></div><div><b>2–10+</b><span>لاعبين</span></div><div><b>6000+</b><span>سؤال ومهمة</span></div>`},0)};
+refresh();setTimeout(refresh,400);window.addEventListener('pageshow',()=>setTimeout(refresh,120));window.PN_REFRESH_IDENTITY_V31=refresh;
+})();
