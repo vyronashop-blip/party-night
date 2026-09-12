@@ -24,6 +24,7 @@ jobs:
       - name: Verify required production files
         shell: bash
         run: |
+          set -euo pipefail
           test -f index.html
           test -f manifest.webmanifest
           test -f sw.js
@@ -31,3 +32,13 @@ jobs:
           test -f trivia-pro-v27.js
           test -f platform-pro-v27.js
           test -f games-pro-v27.js
+          test -f platform-foundation-v31.js
+          test -f content-modes-v31.js
+          test -f duel-content-v31.js
+          test -f duel-games-v31.js
+          test -f party-director-v31.js
+          test -f duel-v31.css
+          grep -q "platform-foundation-v31.js" polish-v22-runtime.js
+          grep -q "duel-games-v31.js" polish-v22-runtime.js
+          grep -q "party-director-v31.js" polish-v22-runtime.js
+          grep -q "platform-foundation-v31.js" sw.js
